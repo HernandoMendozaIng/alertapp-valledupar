@@ -1,0 +1,23 @@
+# Java / Maven
+backend/target/
+backend/evidencias/
+*.class
+
+# Python
+ia-service/.venv/
+__pycache__/
+.pytest_cache/
+
+# Node / Vite
+frontend/node_modules/
+frontend/dist/
+*.tsbuildinfo
+
+# Entorno local
+.logs/
+.env
+.env.*
+.DS_Store
+.playwright-cli/
+.taste-skill/
+.impeccable/

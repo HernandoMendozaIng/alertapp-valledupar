@@ -1,0 +1,48 @@
+server:
+  port: ${PORT:8080}
+
+spring:
+  application:
+    name: alertapp-backend
+  datasource:
+    url: ${DB_URL:jdbc:postgresql://localhost:5432/alertapp}
+    username: ${DB_USER:alertapp}
+    password: ${DB_PASSWORD:alertapp}
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    open-in-view: false
+    properties:
+      hibernate:
+        jdbc:
+          time_zone: America/Bogota
+  flyway:
+    enabled: true
+  servlet:
+    multipart:
+      max-file-size: 5MB
+      max-request-size: 6MB
+  jackson:
+    time-zone: America/Bogota
+
+alertapp:
+  jwt:
+    # En producción se define por variable de entorno. Este valor solo sirve para el entorno local de pruebas.
+    secreto: ${JWT_SECRET:cambiar-este-secreto-local-de-pruebas-alertapp-valledupar-2026}
+    horas-validez: 12
+  cors:
+    origenes: ${CORS_ORIGINS:http://localhost:5173}
+  ia:
+    url: ${IA_URL:http://localhost:8000}
+    timeout-ms: 2500
+  evidencias:
+    carpeta: ${EVIDENCIAS_DIR:./evidencias}
+  validacion:
+    # Diferencia de votos necesaria para validar o anular un reporte automáticamente (HU 07)
+    umbral: 3
+  seed:
+    habilitado: ${SEED_DEMO:true}
+
+springdoc:
+  swagger-ui:
+    path: /docs
