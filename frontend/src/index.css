@@ -1287,7 +1287,6 @@ td select {
   width: 22px;
   height: 0;
   border-top: 5px solid var(--accion);
-  border-radius: 3px;
 }
 
 .linea.corta {
