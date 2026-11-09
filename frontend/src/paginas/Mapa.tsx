@@ -1,9 +1,10 @@
-import { useEffect, useMemo, useState } from 'react'
+import { useEffect, useMemo, useRef, useState } from 'react'
 import { Link } from 'react-router-dom'
 import { Circle, CircleMarker, Popup } from 'react-leaflet'
 import { api, consulta } from '../api'
 import { useSesion } from '../sesion'
 import { useUbicacion } from '../useUbicacion'
+import { useEvento } from '../tiempoReal'
 import { fecha, NIVELES, TIPOS } from '../catalogos'
 import MapaBase, { COLOR_NIVEL } from '../componentes/MapaBase'
 import BotonPanico from '../componentes/BotonPanico'
@@ -25,6 +26,19 @@ export default function Mapa() {
   const [zonas, setZonas] = useState<RespuestaHotspots | null>(null)
   const [riesgo, setRiesgo] = useState<Riesgo | null>(null)
   const [error, setError] = useState('')
+  const [recarga, setRecarga] = useState(0)
+  const ultimaUbicacion = useRef(0)
+
+  // HU 02: la app informa la ubicación real (como máximo una vez por minuto) para saber a quién alertar.
+  useEffect(() => {
+    if (!ubicacion.real || usuario?.rol !== 'CIUDADANO') return
+    if (Date.now() - ultimaUbicacion.current < 60000) return
+    ultimaUbicacion.current = Date.now()
+    api.put('/auth/yo/ubicacion', { latitud: ubicacion.lat, longitud: ubicacion.lng }).catch(() => {})
+  }, [ubicacion.real, ubicacion.lat, ubicacion.lng, usuario?.rol])
+
+  // Un reporte nuevo de cualquier vecino aparece en el mapa sin recargar.
+  useEvento('reporte', () => setRecarga((n) => n + 1))
 
   const desde = useMemo(() => new Date(Date.now() - dias * 86400000).toISOString(), [dias])
 
@@ -37,7 +51,7 @@ export default function Mapa() {
       )
       .then(setReportes)
       .catch((e) => setError(e.message))
-  }, [desde, soloCerca, ubicacion.lat, ubicacion.lng])
+  }, [desde, soloCerca, ubicacion.lat, ubicacion.lng, recarga])
 
   useEffect(() => {
     api.get<RespuestaHotspots>(`/analitica/hotspots${consulta({ dias: Math.max(dias, 30) })}`).then(setZonas).catch(() => {})

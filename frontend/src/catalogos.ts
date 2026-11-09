@@ -1,4 +1,4 @@
-import type { Arma, Elemento, EstadoReporte, Medio, TipoDelito } from './tipos'
+import type { Arma, Elemento, EstadoReporte, Medio, Modo, TipoDelito } from './tipos'
 
 export const TIPOS: Record<TipoDelito, string> = {
   ATRACO: 'Atraco',
@@ -79,6 +79,7 @@ const relativa = new Intl.RelativeTimeFormat('es-CO', { numeric: 'auto' })
 
 export function hace(iso: string) {
   const minutos = Math.round((new Date(iso).getTime() - Date.now()) / 60000)
+  if (Math.abs(minutos) < 1) return 'hace un momento'
   if (Math.abs(minutos) < 60) return relativa.format(minutos, 'minute')
   const horas = Math.round(minutos / 60)
   if (Math.abs(horas) < 24) return relativa.format(horas, 'hour')
@@ -86,7 +87,14 @@ export function hace(iso: string) {
 }
 
 export function metros(m: number) {
-  return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1)} km`
+  return m < 1000 ? `${Math.round(m)} m` : `${(m / 1000).toFixed(1).replace('.', ',')} km`
+}
+
+/** HU 04: modos de desplazamiento del cálculo de rutas. */
+export const MODOS: Record<Modo, string> = {
+  A_PIE: 'A pie',
+  BICICLETA: 'Bicicleta',
+  VEHICULO: 'Carro o moto',
 }
 
 export function distancia(lat1: number, lon1: number, lat2: number, lon2: number) {

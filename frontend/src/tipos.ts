@@ -24,11 +24,17 @@ export interface Usuario {
   telefono: string | null
   rol: Rol
   comuna: number | null
+  notificaciones: boolean
+  radioAlertas: number
+  dosFactores: boolean
 }
 
+/** Si la cuenta tiene 2FA, el ingreso devuelve un desafío en lugar del token. */
 export interface Sesion {
   token: string
   usuario: Usuario
+  requiereSegundoFactor?: boolean
+  desafio?: string | null
 }
 
 export interface ReportePeticion {
@@ -126,4 +132,101 @@ export interface Alerta {
   nota: string | null
   creadoEn: string
   cerradaEn: string | null
+}
+
+// ---------- Sprint 2 ----------
+
+export type Modo = 'A_PIE' | 'BICICLETA' | 'VEHICULO'
+
+export type TipoNotificacion =
+  | 'REPORTE_CERCANO'
+  | 'PANICO_PROTEGIDO'
+  | 'SEGUIMIENTO_PROTEGIDO'
+  | 'GUARDIAN_AGREGADO'
+  | 'ESTADO_REPORTE'
+
+export interface Notificacion {
+  id: number
+  tipo: TipoNotificacion
+  titulo: string
+  cuerpo: string
+  enlace: string | null
+  latitud: number | null
+  longitud: number | null
+  leida: boolean
+  creadoEn: string
+}
+
+export interface Bandeja {
+  sinLeer: number
+  notificaciones: Notificacion[]
+}
+
+export interface Ruta {
+  puntos: [number, number][]
+  metros: number
+  minutos: number
+  metrosEnRiesgo: number
+  exposicion: number
+  reportesCercanos: number
+  calles: string[]
+  nivel: Nivel
+}
+
+export interface ResultadoRuta {
+  modo: Modo
+  segura: Ruta
+  corta: Ruta
+  mismaRuta: boolean
+  metrosExtra: number
+  minutosExtra: number
+  reduccionRiesgo: number
+  explicacion: string
+  reportesConsiderados: number
+  motor: string
+  calculadoEn: string
+}
+
+export interface RutaFrecuente {
+  id: number
+  nombre: string
+  origenLatitud: number
+  origenLongitud: number
+  destinoLatitud: number
+  destinoLongitud: number
+  modo: Modo
+}
+
+export interface Seguimiento {
+  id: number
+  motivo: 'TRAYECTO' | 'PANICO'
+  rutaId: number | null
+  rutaNombre: string | null
+  latitud: number
+  longitud: number
+  iniciadoEn: string
+  actualizadoEn: string
+  expiraEn: string
+  activo: boolean
+  guardianesAvisados: number
+}
+
+export interface Guardian {
+  id: number
+  nombre: string
+  correo: string
+  telefono: string | null
+  desde: string
+}
+
+export interface Protegido {
+  usuarioId: number
+  nombre: string
+  telefono: string | null
+  estado: 'PANICO' | 'TRAYECTO' | 'TRANQUILO'
+  alertaId: number | null
+  latitud: number | null
+  longitud: number | null
+  ubicacionEn: string | null
+  expiraEn: string | null
 }

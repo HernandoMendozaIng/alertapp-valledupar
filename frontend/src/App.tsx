@@ -11,6 +11,11 @@ import Metricas from './paginas/Metricas'
 import Perfil from './paginas/Perfil'
 import Panel from './paginas/Panel'
 import Informe from './paginas/Informe'
+import Rutas from './paginas/Rutas'
+import Red from './paginas/Red'
+import Notificaciones from './paginas/Notificaciones'
+import Seguridad from './paginas/Seguridad'
+import Recuperar from './paginas/Recuperar'
 
 function Protegida({ children, soloAutoridad = false }: { children: React.ReactNode; soloAutoridad?: boolean }) {
   const { usuario, cargando } = useSesion()
@@ -27,6 +32,7 @@ export default function App() {
     <Routes>
       <Route path="/ingreso" element={usuario ? <Navigate to="/" replace /> : <Ingreso />} />
       <Route path="/registro" element={usuario ? <Navigate to="/" replace /> : <Registro />} />
+      <Route path="/recuperar" element={usuario ? <Navigate to="/" replace /> : <Recuperar />} />
       <Route
         element={
           <Protegida>
@@ -41,6 +47,10 @@ export default function App() {
         <Route path="comunidad" element={<Comunidad />} />
         <Route path="metricas" element={<Metricas />} />
         <Route path="perfil" element={<Perfil />} />
+        <Route path="perfil/seguridad" element={<Seguridad />} />
+        <Route path="rutas" element={<Rutas />} />
+        <Route path="red" element={<Red />} />
+        <Route path="avisos" element={<Notificaciones />} />
         <Route
           path="panel"
           element={
