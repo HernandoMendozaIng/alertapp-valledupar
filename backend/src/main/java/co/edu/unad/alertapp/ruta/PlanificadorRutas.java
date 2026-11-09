@@ -185,14 +185,27 @@ public class PlanificadorRutas {
                     ? "La ruta más corta ya es la más segura: no pasa por tramos con reportes recientes."
                     : "No hay un desvío razonable: la ruta más corta también es la más segura. Ten cuidado en los tramos marcados.";
         }
-        int evitados = Math.max(0, corta.metrosEnRiesgo() - segura.metrosEnRiesgo());
         String verbo = switch (modo) {
             case A_PIE -> "caminar";
             case BICICLETA -> "pedalear";
             case VEHICULO -> "recorrer";
         };
-        return "La ruta segura evita " + evitados + " m de tramos con reportes recientes a cambio de " + verbo + " "
-                + extra + " m más" + (minutosExtra > 0 ? " (unos " + minutosExtra + " min)." : ".");
+        int metrosEvitados = corta.metrosEnRiesgo() - segura.metrosEnRiesgo();
+        int reportesEvitados = corta.reportesCercanos() - segura.reportesCercanos();
+        String gana;
+        if (metrosEvitados > 0) {
+            gana = "evita " + metrosEvitados + " m de tramos con reportes recientes";
+        } else if (reportesEvitados > 0) {
+            gana = "pasa lejos de " + reportesEvitados + (reportesEvitados == 1 ? " reporte" : " reportes")
+                    + " que sí toca la más corta";
+        } else {
+            int menos = corta.exposicion() <= 0 ? 0
+                    : (int) Math.round(100 * (1 - segura.exposicion() / corta.exposicion()));
+            gana = "se aleja de las calles con más reportes (" + menos + " % menos exposición)";
+        }
+        String costo = extra == 0 ? " y no es más larga."
+                : " a cambio de " + verbo + " " + extra + " m más" + (minutosExtra > 0 ? " (unos " + minutosExtra + " min)." : ".");
+        return "La ruta segura " + gana + costo;
     }
 
     private static String nombre(ModoTransporte modo) {

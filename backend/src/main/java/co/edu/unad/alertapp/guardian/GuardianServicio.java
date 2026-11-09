@@ -3,7 +3,6 @@ package co.edu.unad.alertapp.guardian;
 import co.edu.unad.alertapp.alerta.AlertaPanico;
 import co.edu.unad.alertapp.alerta.AlertaRepositorio;
 import co.edu.unad.alertapp.comun.ErrorNegocio;
-import co.edu.unad.alertapp.notificacion.CanalTiempoReal;
 import co.edu.unad.alertapp.notificacion.Notificacion;
 import co.edu.unad.alertapp.notificacion.NotificacionServicio;
 import co.edu.unad.alertapp.seguimiento.Seguimiento;
@@ -34,17 +33,14 @@ public class GuardianServicio {
     private final AlertaRepositorio alertas;
     private final SeguimientoRepositorio seguimientos;
     private final NotificacionServicio notificaciones;
-    private final CanalTiempoReal canal;
 
     public GuardianServicio(GuardianRepositorio guardianes, UsuarioRepositorio usuarios, AlertaRepositorio alertas,
-                            SeguimientoRepositorio seguimientos, NotificacionServicio notificaciones,
-                            CanalTiempoReal canal) {
+                            SeguimientoRepositorio seguimientos, NotificacionServicio notificaciones) {
         this.guardianes = guardianes;
         this.usuarios = usuarios;
         this.alertas = alertas;
         this.seguimientos = seguimientos;
         this.notificaciones = notificaciones;
-        this.canal = canal;
     }
 
     public record GuardianRespuesta(Long id, String nombre, String correo, String telefono, OffsetDateTime desde) {
@@ -121,7 +117,14 @@ public class GuardianServicio {
         var datos = Map.of("usuarioId", protegidoId, "latitud", lat, "longitud", lng,
                 "ubicacionEn", OffsetDateTime.now().toString());
         guardianes.findByProtegidoIdOrderByCreadoEn(protegidoId)
-                .forEach(g -> canal.aUsuario(g.getGuardian().getId(), "ubicacion", datos));
+                .forEach(g -> notificaciones.enviar(g.getGuardian().getId(), "ubicacion", datos));
+    }
+
+    /** Avisa a los guardianes que el estado del protegido cambió (alerta cancelada o atendida, trayecto detenido). */
+    @Transactional(readOnly = true)
+    public void difundirEstado(Long protegidoId) {
+        guardianes.findByProtegidoIdOrderByCreadoEn(protegidoId)
+                .forEach(g -> notificaciones.enviar(g.getGuardian().getId(), "protegido", Map.of("usuarioId", protegidoId)));
     }
 
     private ProtegidoRespuesta estado(Usuario p) {

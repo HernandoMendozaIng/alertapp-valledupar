@@ -128,6 +128,7 @@ public class SeguimientoServicio {
     public Optional<SeguimientoRespuesta> detener(Long usuarioId) {
         return seguimientos.activo(usuarioId).map(s -> {
             s.detener();
+            guardianes.difundirEstado(usuarioId);
             return SeguimientoRespuesta.de(s, 0);
         });
     }
@@ -135,6 +136,8 @@ public class SeguimientoServicio {
     @Transactional
     public void detenerPorPanico(Long usuarioId) {
         seguimientos.activo(usuarioId).filter(s -> s.getMotivo() == Seguimiento.Motivo.PANICO).ifPresent(Seguimiento::detener);
+        // Aunque no hubiera seguimiento, la alerta sí cambió: el guardián debe dejar de verla en pánico.
+        guardianes.difundirEstado(usuarioId);
     }
 
     @Transactional(readOnly = true)

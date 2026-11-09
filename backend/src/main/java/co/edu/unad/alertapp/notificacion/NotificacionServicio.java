@@ -45,6 +45,11 @@ public class NotificacionServicio {
         despuesDelCommit(() -> canal.aUsuario(id, "notificacion", dto));
     }
 
+    /** Evento sin bandeja para un usuario (por ejemplo, la posición de un protegido). */
+    public void enviar(Long usuarioId, String evento, Object datos) {
+        despuesDelCommit(() -> canal.aUsuario(usuarioId, evento, datos));
+    }
+
     /** Evento sin bandeja que reciben todos los conectados. */
     public void difundir(String evento, Object datos) {
         despuesDelCommit(() -> canal.aTodos(evento, datos));
