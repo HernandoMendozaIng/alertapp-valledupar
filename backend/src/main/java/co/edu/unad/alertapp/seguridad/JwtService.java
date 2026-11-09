@@ -30,10 +30,16 @@ public class JwtService {
         this.horasValidez = props.jwt().horasValidez();
     }
 
+    /** Tipos de token: la sesión normal y el desafío corto que se entrega antes del segundo factor (HU 10). */
+    static final String SESION = "sesion";
+    static final String DESAFIO_2FA = "2fa";
+    private static final int MINUTOS_DESAFIO = 5;
+
     public String generar(Usuario usuario) {
         Instant ahora = Instant.now();
         return Jwts.builder()
                 .subject(String.valueOf(usuario.getId()))
+                .claim("tipo", SESION)
                 .claim("rol", usuario.getRol().name())
                 .claim("nombre", usuario.getNombre())
                 .issuedAt(Date.from(ahora))
@@ -42,7 +48,29 @@ public class JwtService {
                 .compact();
     }
 
+    /** Token de 5 minutos que solo sirve para enviar el código del segundo factor; no da acceso a la API. */
+    public String generarDesafio(Usuario usuario) {
+        Instant ahora = Instant.now();
+        return Jwts.builder()
+                .subject(String.valueOf(usuario.getId()))
+                .claim("tipo", DESAFIO_2FA)
+                .issuedAt(Date.from(ahora))
+                .expiration(Date.from(ahora.plus(MINUTOS_DESAFIO, ChronoUnit.MINUTES)))
+                .signWith(llave)
+                .compact();
+    }
+
+    /** Valida un token de sesión. Un desafío de 2FA no pasa por aquí aunque tenga firma válida. */
     public Optional<Claims> validar(String token) {
+        return leer(token).filter(c -> SESION.equals(c.get("tipo", String.class)));
+    }
+
+    public Optional<Long> validarDesafio(String token) {
+        return leer(token).filter(c -> DESAFIO_2FA.equals(c.get("tipo", String.class)))
+                .map(c -> Long.valueOf(c.getSubject()));
+    }
+
+    private Optional<Claims> leer(String token) {
         try {
             return Optional.of(Jwts.parser().verifyWith(llave).build().parseSignedClaims(token).getPayload());
         } catch (JwtException | IllegalArgumentException e) {
