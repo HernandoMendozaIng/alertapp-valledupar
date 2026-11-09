@@ -20,6 +20,18 @@ cronograma completo. Cada sprint termina con una revisión (demostración del in
 | Límites reales de las Comunas 3 y 4 desde OpenStreetMap | HU 03 | Hernando Mendoza | 1 h | Hecho |
 | Revisión de las pantallas frente al diseño de Justinmind | HU 0.2 | Armel Peña Rangel | 2 h | Por hacer |
 
+**Ampliación del 9 de noviembre.** Con el núcleo terminado antes de lo previsto, se agregaron al sprint las
+historias que estaban como trabajo futuro, para que el prototipo cubra todo el backlog del documento:
+
+| Tarea | Historia | Responsable | Estimado | Estado |
+|---|---|---|---|---|
+| Red vial de las Comunas 3 y 4 desde OpenStreetMap y algoritmo A* con riesgo | HU 04 | Hernando Mendoza | 4 h | Hecho |
+| Canal en tiempo real (SSE) y avisos por cercanía | HU 02 | Hernando Mendoza | 3 h | Hecho |
+| Guardianes, rutas frecuentes y ubicación compartida | HU 06, HU 12 | Hernando Mendoza | 4 h | Hecho |
+| Verificación en dos pasos (TOTP), cambio de clave y correo, recuperación | HU 10, HU 01 | Hernando Mendoza | 3 h | Hecho |
+| Pantallas nuevas: Rutas, Red, Avisos, Seguridad, Recuperar | HU 02, 04, 06, 10, 12 | Hernando Mendoza | 5 h | Hecho |
+| Pruebas automáticas de interfaz con Playwright e integración continua | Pruebas | Hernando Mendoza | 3 h | Hecho |
+
 ## Sprint 2. Pruebas y documento maestro
 
 - **Fechas:** 10 al 16 de noviembre de 2026
