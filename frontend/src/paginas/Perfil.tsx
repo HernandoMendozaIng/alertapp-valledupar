@@ -1,6 +1,6 @@
 import { useEffect, useState, type FormEvent } from 'react'
 import { Link } from 'react-router-dom'
-import { SignOut } from '@phosphor-icons/react'
+import { CaretRight, ChartBar, ShieldCheck, SignOut, UsersThree } from '@phosphor-icons/react'
 import { api, ErrorApi } from '../api'
 import { useAviso } from '../aviso'
 import { useSesion } from '../sesion'
@@ -60,6 +60,37 @@ export default function Perfil() {
           <SignOut size={18} weight="bold" aria-hidden /> Salir
         </button>
       </div>
+
+      <nav className="menu-perfil" aria-label="Opciones de la cuenta">
+        <Link to="/perfil/seguridad">
+          <ShieldCheck size={22} weight="bold" aria-hidden />
+          <span>
+            <strong>Seguridad y privacidad</strong>
+            <span className="small muted">
+              Alertas cercanas, verificación en dos pasos {usuario?.dosFactores ? '(activa)' : '(inactiva)'}, contraseña
+            </span>
+          </span>
+          <CaretRight size={18} weight="bold" aria-hidden />
+        </Link>
+        {usuario?.rol === 'CIUDADANO' && (
+          <Link to="/red">
+            <UsersThree size={22} weight="bold" aria-hidden />
+            <span>
+              <strong>Mi red de apoyo</strong>
+              <span className="small muted">Guardianes y personas que cuidas</span>
+            </span>
+            <CaretRight size={18} weight="bold" aria-hidden />
+          </Link>
+        )}
+        <Link to="/metricas" className="solo-movil">
+          <ChartBar size={22} weight="bold" aria-hidden />
+          <span>
+            <strong>Métricas de seguridad</strong>
+            <span className="small muted">Reportes por hora, día, tipo y comuna</span>
+          </span>
+          <CaretRight size={18} weight="bold" aria-hidden />
+        </Link>
+      </nav>
 
       {usuario?.rol === 'CIUDADANO' && (
         <section className="separado" style={{ gap: 12 }}>

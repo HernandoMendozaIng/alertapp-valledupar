@@ -8,6 +8,7 @@ import co.edu.unad.alertapp.reporte.ReporteDtos.ReportePeticion;
 import co.edu.unad.alertapp.reporte.ReporteDtos.ReporteRespuesta;
 import co.edu.unad.alertapp.seguridad.UsuarioAutenticado;
 import co.edu.unad.alertapp.usuario.UsuarioRepositorio;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.HttpStatus;
@@ -33,14 +34,17 @@ public class ReporteServicio {
     private final VotoRepositorio votos;
     private final ClasificadorSeveridad clasificador;
     private final AlmacenEvidencias almacen;
+    private final ApplicationEventPublisher eventos;
 
     public ReporteServicio(ReporteRepositorio reportes, UsuarioRepositorio usuarios, VotoRepositorio votos,
-                           ClasificadorSeveridad clasificador, AlmacenEvidencias almacen) {
+                           ClasificadorSeveridad clasificador, AlmacenEvidencias almacen,
+                           ApplicationEventPublisher eventos) {
         this.reportes = reportes;
         this.usuarios = usuarios;
         this.votos = votos;
         this.clasificador = clasificador;
         this.almacen = almacen;
+        this.eventos = eventos;
     }
 
     @Transactional
@@ -50,7 +54,9 @@ public class ReporteServicio {
         Reporte r = new Reporte(autor);
         aplicar(r, p);
         r.setEvidenciaArchivo(almacen.guardar(foto));
-        return ReporteRespuesta.de(reportes.save(r), actual.id(), null);
+        Reporte guardado = reportes.save(r);
+        eventos.publishEvent(ReporteCreado.de(guardado));
+        return ReporteRespuesta.de(guardado, actual.id(), null);
     }
 
     @Transactional

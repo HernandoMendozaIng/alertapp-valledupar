@@ -43,6 +43,30 @@ public class Usuario {
     @Column(name = "creado_en", nullable = false)
     private OffsetDateTime creadoEn = OffsetDateTime.now();
 
+    /** HU 02: recibir alertas de reportes cercanos y radio en metros. */
+    @Column(nullable = false)
+    private boolean notificaciones = true;
+
+    @Column(name = "radio_alertas", nullable = false)
+    private int radioAlertas = 500;
+
+    /** Última ubicación conocida, la envía la app al abrir el mapa. Sirve para saber a quién alertar. */
+    @Column(name = "ultima_latitud")
+    private Double ultimaLatitud;
+
+    @Column(name = "ultima_longitud")
+    private Double ultimaLongitud;
+
+    @Column(name = "ubicacion_en")
+    private OffsetDateTime ubicacionEn;
+
+    /** HU 10: secreto TOTP en Base32. Se guarda al preparar la activación y queda en uso al confirmar. */
+    @Column(name = "totp_secreto", length = 64)
+    private String totpSecreto;
+
+    @Column(name = "dos_factores", nullable = false)
+    private boolean dosFactores;
+
     protected Usuario() {
     }
 
@@ -69,4 +93,24 @@ public class Usuario {
     public void setTelefono(String telefono) { this.telefono = telefono; }
     public void setComuna(Short comuna) { this.comuna = comuna; }
     public void setClaveHash(String claveHash) { this.claveHash = claveHash; }
+    public void setCorreo(String correo) { this.correo = correo; }
+
+    public boolean isNotificaciones() { return notificaciones; }
+    public int getRadioAlertas() { return radioAlertas; }
+    public Double getUltimaLatitud() { return ultimaLatitud; }
+    public Double getUltimaLongitud() { return ultimaLongitud; }
+    public OffsetDateTime getUbicacionEn() { return ubicacionEn; }
+    public String getTotpSecreto() { return totpSecreto; }
+    public boolean isDosFactores() { return dosFactores; }
+
+    public void setNotificaciones(boolean notificaciones) { this.notificaciones = notificaciones; }
+    public void setRadioAlertas(int radioAlertas) { this.radioAlertas = radioAlertas; }
+    public void setTotpSecreto(String totpSecreto) { this.totpSecreto = totpSecreto; }
+    public void setDosFactores(boolean dosFactores) { this.dosFactores = dosFactores; }
+
+    public void ubicar(double latitud, double longitud) {
+        this.ultimaLatitud = latitud;
+        this.ultimaLongitud = longitud;
+        this.ubicacionEn = OffsetDateTime.now();
+    }
 }
