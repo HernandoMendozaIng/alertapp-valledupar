@@ -41,8 +41,9 @@ historias que estaban como trabajo futuro, para que el prototipo cubra todo el b
 |---|---|---|---|
 | Ejecutar el protocolo de pruebas funcionales en el equipo de cada integrante | Armel y Hernando | 2 h | En curso |
 | Ajustes de título, delimitación, antecedentes y marco conceptual | Armel Peña Rangel | 6 h | Por hacer |
-| Capítulos de resultados por objetivo específico (requisitos, diseño, implementación, evaluación) | Hernando Mendoza | 6 h | Por hacer |
-| Diagramas UML y modelo entidad-relación en el documento | Hernando Mendoza | 2 h | Por hacer |
+| Prueba de carga del RNF-01 (10 transacciones por segundo) | Hernando Mendoza | 1 h | Hecho |
+| Capítulos de resultados por objetivo específico (requisitos, diseño, implementación, evaluación) | Hernando Mendoza | 6 h | En curso |
+| Diagramas UML y modelo entidad-relación en el documento | Hernando Mendoza | 2 h | Hecho |
 | Ajuste de muestra, recursos, resultados esperados y conclusiones | Armel Peña Rangel | 4 h | Por hacer |
 | Publicar avance en el foro con la descripción de lo hecho por cada uno | Armel y Hernando | 1 h | Por hacer |
 

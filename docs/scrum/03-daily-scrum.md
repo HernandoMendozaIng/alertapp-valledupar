@@ -34,6 +34,22 @@ Se registra el día en que ocurre; no se completan días hacia atrás.
 - Haré:
 - Bloqueos:
 
+## 10 de noviembre de 2026 (Sprint 2)
+
+**Hernando Mendoza**
+- Hice: preparé el mensaje de avance para el foro. Escribí la prueba de carga del RNF-01
+  (`scripts/carga/prueba_carga.py`) y la corrí: 10 transacciones por segundo durante 60 s sin errores (p95 de
+  22 ms) y 50 por segundo durante 30 s sin errores (p95 de 14 ms). Rehíce los diagramas de casos de uso y de
+  componentes para el documento y volví a tomar las capturas con la base limpia.
+- Haré: terminar los capítulos por objetivo del documento maestro y revisarlos con Armel.
+- Bloqueos: el servidor de teselas de OpenStreetMap no respondió en la tarde, así que las capturas con mapa se
+  dejaron en la versión del 9 de noviembre.
+
+**Armel Peña Rangel**
+- Hice:
+- Haré:
+- Bloqueos:
+
 ## Plantilla
 
 ```
