@@ -131,7 +131,29 @@ vecino1, alerta de pánico de `ACTIVA` a `ATENDIDA` con la nota "Patrulla enviad
 `VALIDADO` a `EN_REVISION`, el filtro de métricas de 142 a 87 reportes al elegir la Comuna 3 y el CSV separado por
 punto y coma que abre en Excel.
 
-## 4. Cumplimiento de funciones
+## 4. Prueba de carga (RNF-01)
+
+El RNF-01 pide atender 10 transacciones por segundo. `scripts/carga/prueba_carga.py` envía peticiones a ritmo
+constante durante un tiempo fijo, alternando las cinco consultas que más usa la app (reportes cercanos, índice de
+riesgo, puntos calientes, métricas y ruta segura), y reporta la latencia y los errores. Solo hace lecturas, así que
+no deja datos en la base.
+
+```bash
+python3 scripts/carga/prueba_carga.py                     # 10 por segundo durante 60 s
+python3 scripts/carga/prueba_carga.py --tps 50 --segundos 30
+```
+
+Resultados del 10 de noviembre de 2026 (Apple M5, 16 GB, los tres servicios encendidos):
+
+| Carga | Duración | Peticiones | Errores | Mediana | p95 | Máximo |
+|---|---|---|---|---|---|---|
+| 10 por segundo | 60 s | 600 | 0 | 10 ms | 22 ms | 366 ms |
+| 50 por segundo | 30 s | 1 500 | 0 | 7 ms | 14 ms | 151 ms |
+
+Cliente y servidor corrieron en el mismo computador y las consultas fueron de lectura. La medición en la nube, con
+red de por medio y escrituras, corresponde a TRL 6.
+
+## 5. Cumplimiento de funciones
 
 | Función prevista para el prototipo | Historia | Estado |
 |---|---|---|

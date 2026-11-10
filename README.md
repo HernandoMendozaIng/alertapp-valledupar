@@ -95,6 +95,8 @@ cd frontend && npm run test:e2e                # 22 pruebas de interfaz con Play
 
 La prueba `LatenciaAlertasTest` mide el criterio de la HU 02: la alerta llega en menos de 5 segundos (en las
 corridas, menos de 0,05 s). El protocolo y los resultados están en [docs/pruebas-funcionales.md](docs/pruebas-funcionales.md).
+`scripts/carga/prueba_carga.py` mide el RNF-01: con 10 transacciones por segundo durante un minuto no hubo
+errores y el 95 % de las respuestas tardó 22 ms o menos.
 GitHub Actions corre las pruebas de la API, de la IA y la compilación de la web en cada cambio a `main`.
 
 `npm run capturas` (en `frontend/`) vuelve a generar las imágenes de [docs/capturas](docs/capturas).
