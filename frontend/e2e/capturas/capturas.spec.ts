@@ -8,6 +8,14 @@ import { api, AUTORIDAD, CIUDADANO, ingresar, token } from '../ayudas'
 const DESTINO = '../docs/capturas'
 
 async function foto(page: Page, nombre: string) {
+  // Si la pantalla tiene mapa, espera a que carguen las teselas de OpenStreetMap para que no salga el fondo gris.
+  await page
+    .waitForFunction(
+      () => [...document.querySelectorAll<HTMLImageElement>('img.leaflet-tile')].every((t) => t.complete),
+      undefined,
+      { timeout: 8_000 },
+    )
+    .catch(() => {})
   await page.waitForTimeout(900)
   await page.screenshot({ path: `${DESTINO}/${nombre}.png` })
 }
