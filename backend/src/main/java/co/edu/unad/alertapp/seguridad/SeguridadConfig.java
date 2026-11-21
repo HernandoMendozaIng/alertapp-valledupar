@@ -1,6 +1,7 @@
 package co.edu.unad.alertapp.seguridad;
 
 import co.edu.unad.alertapp.config.AlertAppProperties;
+import jakarta.servlet.DispatcherType;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.http.HttpMethod;
@@ -32,7 +33,10 @@ public class SeguridadConfig {
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .exceptionHandling(e -> e.authenticationEntryPoint(new HttpStatusEntryPoint(HttpStatus.UNAUTHORIZED)))
                 .authorizeHttpRequests(a -> a
-                        .requestMatchers("/api/auth/registro", "/api/auth/ingreso").permitAll()
+                        // El canal SSE se despacha de forma asíncrona; la autenticación ya se verificó en la petición original.
+                        .dispatcherTypeMatchers(DispatcherType.ASYNC).permitAll()
+                        .requestMatchers("/api/auth/registro", "/api/auth/ingreso", "/api/auth/ingreso/2fa",
+                                "/api/auth/recuperar", "/api/auth/recuperar/confirmar").permitAll()
                         .requestMatchers("/docs/**", "/v3/api-docs/**", "/swagger-ui/**", "/api/salud", "/error").permitAll()
                         .requestMatchers("/api/panel/**").hasRole("AUTORIDAD")
                         .requestMatchers(HttpMethod.GET, "/api/analitica/exportar").hasRole("AUTORIDAD")

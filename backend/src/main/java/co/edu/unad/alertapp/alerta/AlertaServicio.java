@@ -1,6 +1,9 @@
 package co.edu.unad.alertapp.alerta;
 
 import co.edu.unad.alertapp.comun.ErrorNegocio;
+import co.edu.unad.alertapp.guardian.GuardianServicio;
+import co.edu.unad.alertapp.notificacion.Notificacion;
+import co.edu.unad.alertapp.seguimiento.SeguimientoServicio;
 import co.edu.unad.alertapp.seguridad.UsuarioAutenticado;
 import co.edu.unad.alertapp.usuario.UsuarioRepositorio;
 import org.springframework.http.HttpStatus;
@@ -11,18 +14,24 @@ import java.time.OffsetDateTime;
 import java.util.List;
 
 /**
- * HU 11 - Botón de pánico. En el prototipo la alerta queda registrada con la ubicación GPS y aparece
- * de inmediato en el panel de la autoridad. El envío por SMS o notificación push queda para TRL 6.
+ * HU 11 - Botón de pánico. La alerta queda registrada con la ubicación GPS, aparece de inmediato en el panel
+ * de la autoridad y llega en tiempo real a los guardianes del usuario (HU 12), que pueden seguir su posición
+ * durante una hora. El envío por SMS queda para TRL 6.
  */
 @Service
 public class AlertaServicio {
 
     private final AlertaRepositorio alertas;
     private final UsuarioRepositorio usuarios;
+    private final GuardianServicio guardianes;
+    private final SeguimientoServicio seguimiento;
 
-    public AlertaServicio(AlertaRepositorio alertas, UsuarioRepositorio usuarios) {
+    public AlertaServicio(AlertaRepositorio alertas, UsuarioRepositorio usuarios, GuardianServicio guardianes,
+                          SeguimientoServicio seguimiento) {
         this.alertas = alertas;
         this.usuarios = usuarios;
+        this.guardianes = guardianes;
+        this.seguimiento = seguimiento;
     }
 
     public record AlertaRespuesta(Long id, String usuario, String telefono, double latitud, double longitud,
@@ -42,7 +51,12 @@ public class AlertaServicio {
                 .orElseGet(() -> {
                     var u = usuarios.findById(actual.id())
                             .orElseThrow(() -> new ErrorNegocio(HttpStatus.UNAUTHORIZED, "Tu sesión ya no es válida"));
-                    return AlertaRespuesta.de(alertas.save(new AlertaPanico(u, lat, lng)));
+                    AlertaPanico a = alertas.save(new AlertaPanico(u, lat, lng));
+                    seguimiento.iniciarPorPanico(u, lat, lng);
+                    guardianes.notificar(u.getId(), Notificacion.Tipo.PANICO_PROTEGIDO,
+                            u.getNombre() + " activó el botón de pánico",
+                            "Mira su ubicación en el mapa y llámalo. Si no contesta, llama al 123.", lat, lng);
+                    return AlertaRespuesta.de(a);
                 });
     }
 
@@ -56,6 +70,7 @@ public class AlertaServicio {
             throw new ErrorNegocio(HttpStatus.CONFLICT, "La alerta ya no está activa");
         }
         a.cerrar(AlertaPanico.Estado.CANCELADA, "Cancelada por el usuario");
+        seguimiento.detenerPorPanico(actual.id());
         return AlertaRespuesta.de(a);
     }
 
@@ -66,6 +81,7 @@ public class AlertaServicio {
             throw new ErrorNegocio(HttpStatus.CONFLICT, "La alerta ya fue cerrada");
         }
         a.cerrar(AlertaPanico.Estado.ATENDIDA, nota == null || nota.isBlank() ? "Atendida" : nota.trim());
+        seguimiento.detenerPorPanico(a.getUsuario().getId());
         return AlertaRespuesta.de(a);
     }
 

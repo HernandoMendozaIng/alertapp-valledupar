@@ -2,10 +2,15 @@ package co.edu.unad.alertapp.config;
 
 import co.edu.unad.alertapp.comunidad.Voto;
 import co.edu.unad.alertapp.comunidad.VotoRepositorio;
+import co.edu.unad.alertapp.guardian.Guardian;
+import co.edu.unad.alertapp.guardian.GuardianRepositorio;
 import co.edu.unad.alertapp.reporte.Catalogos;
 import co.edu.unad.alertapp.reporte.ClasificadorSeveridad;
 import co.edu.unad.alertapp.reporte.Reporte;
 import co.edu.unad.alertapp.reporte.ReporteRepositorio;
+import co.edu.unad.alertapp.seguimiento.ModoTransporte;
+import co.edu.unad.alertapp.seguimiento.RutaFrecuente;
+import co.edu.unad.alertapp.seguimiento.RutaFrecuenteRepositorio;
 import co.edu.unad.alertapp.usuario.Rol;
 import co.edu.unad.alertapp.usuario.Usuario;
 import co.edu.unad.alertapp.usuario.UsuarioRepositorio;
@@ -32,6 +37,7 @@ import java.util.Random;
  * cuentas de demostración y 154 reportes generados dentro de los límites de las Comunas 3 y 4.
  * No son denuncias reales; sirven para las pruebas funcionales del nivel TRL 5.
  * Las fechas se desplazan por semanas completas para que los datos queden en los últimos 90 días.
+ * Desde el Sprint 2 también deja configurada la red de guardianes y una ruta frecuente del ciudadano de prueba.
  */
 @Component
 public class DatosDemo implements ApplicationRunner {
@@ -45,9 +51,14 @@ public class DatosDemo implements ApplicationRunner {
     private final PasswordEncoder codificador;
     private final ClasificadorSeveridad clasificador;
     private final ObjectMapper mapper;
+    private final GuardianRepositorio guardianes;
+    private final RutaFrecuenteRepositorio rutas;
 
     public DatosDemo(AlertAppProperties props, UsuarioRepositorio usuarios, ReporteRepositorio reportes,
-                     VotoRepositorio votos, PasswordEncoder codificador, ClasificadorSeveridad clasificador, ObjectMapper mapper) {
+                     VotoRepositorio votos, PasswordEncoder codificador, ClasificadorSeveridad clasificador, ObjectMapper mapper,
+                     GuardianRepositorio guardianes, RutaFrecuenteRepositorio rutas) {
+        this.guardianes = guardianes;
+        this.rutas = rutas;
         this.props = props;
         this.usuarios = usuarios;
         this.reportes = reportes;
@@ -60,9 +71,34 @@ public class DatosDemo implements ApplicationRunner {
     @Override
     @Transactional
     public void run(ApplicationArguments args) throws Exception {
-        if (!props.seed().habilitado() || usuarios.count() > 0) {
+        if (!props.seed().habilitado()) {
             return;
         }
+        if (usuarios.count() == 0) {
+            sembrarBase();
+        }
+        if (guardianes.count() == 0) {
+            sembrarSeguridadPersonal();
+        }
+    }
+
+    /** Sprint 2: Luis tiene a Marta y a Jairo como guardianes y una ruta guardada de la casa al trabajo. */
+    private void sembrarSeguridadPersonal() {
+        var luis = usuarios.findByCorreoIgnoreCase("ciudadano@alertapp.co").orElse(null);
+        var marta = usuarios.findByCorreoIgnoreCase("vecino1@alertapp.co").orElse(null);
+        var jairo = usuarios.findByCorreoIgnoreCase("vecino2@alertapp.co").orElse(null);
+        if (luis == null || marta == null || jairo == null) return;
+        guardianes.save(new Guardian(luis, marta));
+        guardianes.save(new Guardian(luis, jairo));
+        if (rutas.countByUsuarioId(luis.getId()) == 0) {
+            RutaFrecuente casaTrabajo = new RutaFrecuente(luis);
+            casaTrabajo.actualizar("Casa al trabajo", 10.45690, -73.25620, 10.44860, -73.24640, ModoTransporte.A_PIE);
+            rutas.save(casaTrabajo);
+        }
+        log.info("Red de guardianes y ruta frecuente de demostración cargadas");
+    }
+
+    private void sembrarBase() throws Exception {
         String clave = codificador.encode("Valledupar2026");
         usuarios.save(new Usuario("Teniente Rosa Daza", "autoridad@alertapp.co", clave, "3001234567", Rol.AUTORIDAD, null));
         Usuario demo = usuarios.save(new Usuario("Luis Ariza", "ciudadano@alertapp.co", clave, "3015550142", Rol.CIUDADANO, (short) 3));

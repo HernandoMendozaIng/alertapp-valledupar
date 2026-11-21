@@ -13,7 +13,8 @@ agrupa los puntos calientes y la autoridad (Policía y Alcaldía) gestiona los c
   estados, descarga informes semanales.
 
 ## Superficies y modo
-- App del ciudadano: **Operate**, móvil primero, navegación inferior (Mapa, Reportar, Comunidad, Métricas, Perfil).
+- App del ciudadano: **Operate**, móvil primero, navegación inferior (Mapa, Rutas, Reportar, Comunidad, Avisos,
+  Perfil). Métricas, Seguridad y la red de guardianes se abren desde el Perfil en el celular.
 - Panel de autoridad: **Operate**, escritorio primero, denso pero legible.
 
 ## Restricciones del brief (no negociables)

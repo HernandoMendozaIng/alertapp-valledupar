@@ -3,6 +3,8 @@ package co.edu.unad.alertapp.alerta;
 import co.edu.unad.alertapp.alerta.AlertaServicio.AlertaRespuesta;
 import co.edu.unad.alertapp.comun.ErrorNegocio;
 import co.edu.unad.alertapp.comunidad.ComunidadServicio;
+import co.edu.unad.alertapp.notificacion.Notificacion;
+import co.edu.unad.alertapp.notificacion.NotificacionServicio;
 import co.edu.unad.alertapp.reporte.Catalogos.Estado;
 import co.edu.unad.alertapp.reporte.Reporte;
 import co.edu.unad.alertapp.reporte.ReporteDtos.ReporteRespuesta;
@@ -45,12 +47,20 @@ public class PanelControlador {
     private final ReporteServicio reportes;
     private final ComunidadServicio comunidad;
     private final AlertaServicio alertas;
+    private final NotificacionServicio notificaciones;
 
-    public PanelControlador(ReporteServicio reportes, ComunidadServicio comunidad, AlertaServicio alertas) {
+    public PanelControlador(ReporteServicio reportes, ComunidadServicio comunidad, AlertaServicio alertas,
+                            NotificacionServicio notificaciones) {
         this.reportes = reportes;
         this.comunidad = comunidad;
         this.alertas = alertas;
+        this.notificaciones = notificaciones;
     }
+
+    private static final Map<Estado, String> FRASES = Map.of(
+            Estado.EN_REVISION, "La autoridad está revisando tu reporte",
+            Estado.CERRADO, "La autoridad cerró tu reporte",
+            Estado.DESCARTADO, "La autoridad descartó tu reporte");
 
     public record CambioEstado(@NotNull(message = "Indica el nuevo estado") Estado estado,
                                @Size(max = 400) String nota) {}
@@ -67,8 +77,15 @@ public class PanelControlador {
                     "No se puede pasar de " + r.getEstado() + " a " + cambio.estado());
         }
         r.setEstado(cambio.estado());
-        if (cambio.nota() != null && !cambio.nota().isBlank()) {
+        boolean conNota = cambio.nota() != null && !cambio.nota().isBlank();
+        if (conNota) {
             comunidad.comentar(usuario, id, cambio.nota());
+        }
+        // HU 13: el ciudadano se entera del avance de su caso sin tener que entrar a buscarlo.
+        if (FRASES.containsKey(cambio.estado())) {
+            notificaciones.notificar(r.getAutor(), Notificacion.Tipo.ESTADO_REPORTE, FRASES.get(cambio.estado()),
+                    conNota ? cambio.nota().trim() : "Entra al reporte para ver el detalle.",
+                    "/reportes/" + id, r.getLatitud(), r.getLongitud());
         }
         return ReporteRespuesta.de(r, usuario.id(), null);
     }

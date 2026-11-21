@@ -9,13 +9,16 @@ import './index.css'
 import App from './App'
 import { ProveedorSesion } from './sesion'
 import { ProveedorAviso } from './aviso'
+import { ProveedorTiempoReal } from './tiempoReal'
 
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <BrowserRouter>
       <ProveedorSesion>
         <ProveedorAviso>
-          <App />
+          <ProveedorTiempoReal>
+            <App />
+          </ProveedorTiempoReal>
         </ProveedorAviso>
       </ProveedorSesion>
     </BrowserRouter>

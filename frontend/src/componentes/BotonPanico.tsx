@@ -4,6 +4,7 @@ import { api } from '../api'
 import { useAviso } from '../aviso'
 import type { Alerta } from '../tipos'
 import type { Ubicacion } from '../useUbicacion'
+import { useSeguimiento } from '../seguimiento'
 
 const SEGUNDOS = 5
 
@@ -13,6 +14,7 @@ const SEGUNDOS = 5
  */
 export default function BotonPanico({ ubicacion }: { ubicacion: Ubicacion }) {
   const aviso = useAviso()
+  const seguimiento = useSeguimiento()
   const [fase, setFase] = useState<'reposo' | 'cuenta' | 'enviando' | 'activa'>('reposo')
   const [restante, setRestante] = useState(SEGUNDOS)
   const [alerta, setAlerta] = useState<Alerta | null>(null)
@@ -50,6 +52,8 @@ export default function BotonPanico({ ubicacion }: { ubicacion: Ubicacion }) {
         .then((a) => {
           setAlerta(a)
           setFase('activa')
+          // El servidor abrió un seguimiento de 1 hora: desde aquí la app manda la posición a los guardianes.
+          seguimiento.refrescar()
           if ('vibrate' in navigator) navigator.vibrate?.([120, 60, 120])
         })
         .catch((e) => {
@@ -57,7 +61,7 @@ export default function BotonPanico({ ubicacion }: { ubicacion: Ubicacion }) {
           setFase('reposo')
         })
     }
-  }, [restante, fase, ubicacion, aviso])
+  }, [restante, fase, ubicacion, aviso, seguimiento])
 
   function iniciar() {
     setRestante(SEGUNDOS)
@@ -74,6 +78,7 @@ export default function BotonPanico({ ubicacion }: { ubicacion: Ubicacion }) {
     try {
       await api.post<Alerta>(`/alertas/${alerta.id}/cancelar`)
       aviso('Alerta cancelada')
+      seguimiento.refrescar()
     } catch (e) {
       aviso((e as Error).message, 'error')
     }
@@ -98,7 +103,7 @@ export default function BotonPanico({ ubicacion }: { ubicacion: Ubicacion }) {
                   {restante}
                 </p>
                 <p className="muted">
-                  La autoridad recibirá tu ubicación{ubicacion.real ? '' : ' aproximada (no se pudo leer el GPS)'}.
+                  La autoridad y tus guardianes recibirán tu ubicación{ubicacion.real ? '' : ' aproximada (no se pudo leer el GPS)'}.
                   Si fue un error, cancela ahora.
                 </p>
                 <button ref={cancelarRef} className="btn secundario bloque" onClick={cancelarCuenta}>
@@ -116,8 +121,8 @@ export default function BotonPanico({ ubicacion }: { ubicacion: Ubicacion }) {
               <>
                 <h2 id="titulo-panico">Alerta enviada</h2>
                 <p>
-                  La autoridad ya ve tu alerta en su panel. Busca un lugar concurrido y, si puedes, llama al{' '}
-                  <a href="tel:123">123</a>.
+                  La autoridad ya ve tu alerta en su panel y tus guardianes recibieron tu ubicación. Busca un lugar
+                  concurrido y, si puedes, llama al <a href="tel:123">123</a>.
                 </p>
                 <a className="btn peligro bloque" href="tel:123">
                   Llamar al 123
